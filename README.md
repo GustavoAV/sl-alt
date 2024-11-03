@@ -1,2 +1,3 @@
-# sl-extras
-SL bash clone but with extra options.
+# sl-alt
+
+SL-like bash script.
