@@ -7,13 +7,13 @@ set -euo pipefail
 declare -a frames
 
 if [[ $# -eq 0 ]]; then
-    frames=( "🚂🚃🚃" )
+    frames=("🚂🚃🚃")
 else
     # If provided files as arguments, use them for frames
     while [[ $# -gt 0 ]]; do
         filename=$1
-        if [[ -r "$filename" ]]; then
-            frames+=("$(< "$filename")")
+        if [[ -r $filename ]]; then
+            frames+=("$(<"$filename")")
         fi
         shift
     done
@@ -38,19 +38,27 @@ columns=$(tput cols)
 position=$((columns - longest_line_size))
 frame_time=0.05
 
-while [[ "$position" -ge 0 ]]; do
+cleanup() {
+    tput cnorm
+}
+
+trap cleanup EXIT
+tput civis
+
+while [[ $position -ge 0 ]]; do
     clear
 
-    # Spaces each line from the frame 
+    # Spaces each line from the frame
     # TODO: Loop for multiple frames
     while IFS= read -r line; do
         printf "%*s%s\n" "$position" "" "$line"
-    done <<< "${frames[0]}"
+    done <<<"${frames[0]}"
 
     sleep "$frame_time"
     position=$((position - 1))
 done
 
+cleanup
 clear
 
 exit 0
