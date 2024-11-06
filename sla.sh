@@ -20,7 +20,6 @@ else
 fi
 
 # Get longest line size
-# https://stackoverflow.com/questions/1655372/longest-line-in-a-file
 
 longest_line_size=0
 
@@ -33,10 +32,9 @@ done
 
 # Print animation
 
-# https://stackoverflow.com/questions/263890/how-do-i-find-the-width-height-of-a-terminal-window
 columns=$(tput cols)
 position=$((columns - longest_line_size))
-frame_time=0.05
+frame_time=0.01
 
 cleanup() {
     tput cnorm
@@ -45,13 +43,22 @@ cleanup() {
 trap cleanup EXIT
 tput civis
 
-while [[ $position -ge 0 ]]; do
+# If position >= 0, spaces each line from the frame
+# If position < 0, print only section of line
+while [[ $position -gt -$longest_line_size ]]; do
     clear
 
-    # Spaces each line from the frame
     # TODO: Loop for multiple frames
     while IFS= read -r line; do
-        printf "%*s%s\n" "$position" "" "$line"
+        if [[ $position -ge 0 ]]; then
+            printf "%*s%s\n" "$position" "" "$line"
+        else
+            # Substring expansion: https://unix.stackexchange.com/a/163484
+            echo "${line: -$position}"
+            # abs_position=${position/-/}
+            # cut -c "$(( abs_position + 1 ))-$longest_line_size" <<< "$line"
+
+        fi
     done <<<"${frames[0]}"
 
     sleep "$frame_time"
